@@ -15,16 +15,6 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
-// webkitgtk 2.34.4 was used to develop the portable parts of the exploit
-// before moving on to ps4 8.03
-//
-// webkitgtk 2.34.4 was built with cmake variable ENABLE_JIT=OFF, that variable
-// can affect the size of SerializedScriptValue
-//
-// this target is no longer supported
-//
-//export const gtk_2_34_4 = 0;
-
 // the original target platform was 8.03, this version confirmed works on ps4
 // 7.xx-8.xx
 export const ps4_8_03 = 1;
