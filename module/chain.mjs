@@ -108,7 +108,7 @@ export class ChainBase {
     push_call(func_addr, ...args) {
         if (args.length > 6) {
             throw TypeError(
-                'call() does not support functions that have more than 6'
+                'call() does not support functions that has more than 6'
                 + ' arguments'
             );
         }
@@ -161,7 +161,7 @@ export class ChainBase {
     }
 
     get return_value() {
-        return read64(this._return_value, 0);
+        return read64(this._return_value);
     }
 
     // Sets needed class properties
