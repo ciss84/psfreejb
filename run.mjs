@@ -27,7 +27,7 @@ async function run() {
     clear_log();
 
     // path to your script that will use the exploit
-    import('./rop.mjs');
+    import('./code.mjs');
 }
 
 run();
