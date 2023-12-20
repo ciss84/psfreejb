@@ -26,6 +26,7 @@ async function run() {
     await wait_mem();
     clear_log();
 
+    // path to your script that will use the exploit
     import('./rop.mjs');
 }
 

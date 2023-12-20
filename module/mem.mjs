@@ -52,7 +52,6 @@ export class Memory {
 
         this._current_addr = main_addr;
 
-        const mem = this;
         class Addr extends Int {
             read8(offset) {
                 let addr = this.add(offset);
@@ -135,6 +134,52 @@ export class Memory {
 
     get_addr() {
         return this._current_addr;
+    }
+
+    // write0() is for when you want to write to address 0. You can't use for
+    // example: "mem.write32(Int.Zero, 0)", since you can't set by index the
+    // view when it isDetached(). isDetached() == true when m_mode >=
+    // WastefulTypedArray and m_vector == 0.
+    //
+    // Functions like write32() will index mem.worker via write() from rw.mjs.
+    //
+    // size is the number of bits to read/write.
+    //
+    // The constraint is 0 <= offset + 1 < 2**32.
+    //
+    // PS4 firmwares >= 9.00 and any PS5 version can write to address 0
+    // directly. All firmwares (PS4 and PS5) can read address 0 directly.
+    //
+    // See setIndex() from
+    // WebKit/Source/JavaScriptCore/runtime/JSGenericTypedArrayView.h at PS4
+    // 8.03 for more information. Affected firmwares will get this error:
+    //
+    // TypeError: Underlying ArrayBuffer has been detached from the view
+    write0(size, offset, value) {
+        const i = offset + 1;
+        if (i >= 2**32 || i < 0) {
+            throw RangeError(`read0() invalid offset: ${offset}`);
+        }
+
+        this.set_addr(new Int(-1));
+
+        switch (size) {
+            case 8: {
+                this.worker[i] = value;
+            }
+            case 16: {
+                write16(this.worker, i, value);
+            }
+            case 32: {
+                write32(this.worker, i, value);
+            }
+            case 64: {
+                write64(this.worker, i, value);
+            }
+            default: {
+                throw RangeError(`write0() invalid size: ${size}`);
+            }
+        }
     }
 
     read8(addr) {
