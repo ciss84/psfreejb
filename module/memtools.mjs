@@ -38,24 +38,12 @@ export function make_buffer(addr, size) {
     const u = new Uint8Array(1);
     const u_addr = mem.addrof(u);
 
-    const old_addr = u_addr.read64(o.view_m_vector);
     u_addr.write64(o.view_m_vector, addr);
-
-    const old_size = u_addr.read32(o.view_m_length);
     u_addr.write32(o.view_m_length, size);
-
-    const old_mode = u_addr.read32(o.view_m_mode);
     // force mode to FastTypedArray
     u_addr.write32(o.view_m_mode, mode_fast);
 
-    const res = u.buffer;
-
-    // restore
-    u_addr.write64(o.view_m_vector, old_addr);
-    u_addr.write32(o.view_m_length, old_size);
-    u_addr.write32(o.view_m_mode, old_mode);
-
-    return res;
+    return u.buffer;
 }
 
 function eq(a, b) {
@@ -173,22 +161,19 @@ export function init_syscall_array(
         throw Error(`max_search_size is less than 0: ${max_search_size}`);
     }
 
+    // 'rdlo' string from libkernel_web's .rodata section
+    const str = 0x6f6c6472;
     const libkernel_web_buffer = make_buffer(
         libkernel_web_base,
         max_search_size,
     );
-    const kbuf = new Uint8Array(libkernel_web_buffer);
 
-    // Search 'rdlo' string from libkernel_web's .rodata section to gain an
-    // upper bound on the size of the .text section.
+    // Search for the string as to gain a upper bound on the size of the .text
+    // section.
     let text_size = 0;
     let found = false;
     for (let i = 0; i < max_search_size; i++) {
-        if (kbuf[i] === 0x72
-            && kbuf[i + 1] === 0x64
-            && kbuf[i + 2] === 0x6c
-            && kbuf[i + 3] === 0x6f
-        ) {
+        if (libkernel_web_base.read32(i) === str) {
             text_size = i;
             found = true;
             break;
@@ -206,6 +191,7 @@ export function init_syscall_array(
     //     mov rax, X
     //     mov r10, rcx
     //     syscall
+    const kbuf = new Uint8Array(libkernel_web_buffer);
     for (let i = 0; i < text_size; i++) {
         if (kbuf[i] === 0x48
             && kbuf[i + 1] === 0xc7
@@ -219,7 +205,7 @@ export function init_syscall_array(
             const syscall_num = read32(kbuf, i + 3);
             syscall_array[syscall_num] = libkernel_web_base.add(i);
             // skip the sequence
-            i += 11;
+            i += 12;
         }
     }
 }
