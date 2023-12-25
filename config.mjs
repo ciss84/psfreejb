@@ -20,10 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 //
 // webkitgtk 2.34.4 was built with cmake variable ENABLE_JIT=OFF, that variable
 // can affect the size of SerializedScriptValue
-//
-// this target is no longer supported
-//
-//export const gtk_2_34_4 = 0;
+export const gtk_2_34_4 = 0;
 
 // the original target platform was 8.03, this version confirmed works on ps4
 // 7.xx-8.xx
@@ -38,14 +35,11 @@ export const ps5_5_00 = ps4_9_00;
 // this version for 6.50-6.72
 export const ps4_6_50 = 3;
 
-// this version for 6.00-6.20
-export const ps4_6_00 = 4;
-
 export function set_target(value) {
     switch (value) {
+        case gtk_2_34_4:
         case ps4_8_03:
         case ps4_9_00:
-        case ps4_6_00:
         case ps4_6_50: {
             break;
         }
@@ -57,41 +51,4 @@ export function set_target(value) {
     target = value;
 }
 
-function DetectFirmwareVersion()
-{
-    var UA = navigator.userAgent.substring(navigator.userAgent.indexOf('5.0 (') + 19, navigator.userAgent.indexOf(') Apple')).replace("PlayStation 4/","");
-    
-    if (UA == "6.00" || UA == "6.02" || UA == "6.10" || UA == "6.20")
-    {
-        return ps4_6_00;
-    }
-
-    if (UA == "6.50" || UA == "6.70" || UA == "6.71" || UA == "6.72")
-    {
-        return ps4_6_50;
-    }
-
-    if (UA == "7.01" || UA == "7.02" || UA == "7.50" || UA == "7.51" || UA == "7.55" || UA == "8.00" || UA == "8.01" || UA == "8.03" || UA == "8.50")
-    {
-        return ps4_8_03;
-    }
-    
-    //on 9.00 Fw deection changed to laysation insead of regular Playsation
-    UA = navigator.userAgent.substring(navigator.userAgent.indexOf('5.0 (') + 19, navigator.userAgent.indexOf(') Apple')).replace("layStation 4/","");
-
-
-    if (UA == "9.00" || UA == "9.03" || UA == "9.04" || UA == "9.50" || UA == "9.60")
-    {
-        return ps4_9_00;
-    }
-
-    UA = navigator.userAgent.substring(navigator.userAgent.indexOf('5.0 (') + 27, navigator.userAgent.indexOf(') Apple')).replace("PlayStation; PlayStation 5/","");
-    
-    if (UA == "5.00" || UA == "5.10" || UA == "5.50")
-    {
-        return ps5_5_00;
-    }
-
-}
-
-export let target = DetectFirmwareVersion();
+export let target = ps4_9_00;
