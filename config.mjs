@@ -84,7 +84,11 @@ function DetectFirmwareVersion()
     {
         return ps4_9_00;
     }
-
+    
+    if (UA == "5.00" || UA == "5.10" || UA == "5.50")
+    {
+        return ps5_5_00;
+    }
 }
 
 export let target = DetectFirmwareVersion();
