@@ -85,7 +85,7 @@ function DetectFirmwareVersion()
         return ps4_9_00;
     }
 
-    UA = navigator.userAgent.substring(navigator.userAgent.indexOf('5.0 (') + 19, navigator.userAgent.indexOf(') Apple')).replace("PlayStation 5/","");
+    UA = navigator.userAgent.substring(navigator.userAgent.indexOf('5.0 (') + 27, navigator.userAgent.indexOf(') Apple')).replace("PlayStation; PlayStation 5/","");
     
     if (UA == "5.00" || UA == "5.10" || UA == "5.50")
     {
