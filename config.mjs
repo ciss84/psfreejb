@@ -84,13 +84,14 @@ function DetectFirmwareVersion()
     {
         return ps4_9_00;
     }
-    
+
     UA = navigator.userAgent.substring(navigator.userAgent.indexOf('5.0 (') + 19, navigator.userAgent.indexOf(') Apple')).replace("PlayStation 5/","");
     
     if (UA == "5.00" || UA == "5.10" || UA == "5.50")
     {
         return ps5_5_00;
     }
+
 }
 
 export let target = DetectFirmwareVersion();
